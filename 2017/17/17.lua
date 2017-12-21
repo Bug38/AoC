@@ -14,16 +14,6 @@ end
 
 local input = readAll("input17.txt")
 
-
---input = { 'snd 1',
---  'snd 2',
---  'snd p',
---  'rcv a',
---  'rcv b',
---  'rcv c',
---  'rcv d',
---}
-
 local vars = {
   prog0 = {
     p = 0,
@@ -48,12 +38,10 @@ local sent = {
 }
 
 local function iter(prog, other)
-  print(input[i[prog]])
-  --local out = prog..' : '
-  if vars[prog].isWaiting == true then
-    return
-  end
+  if vars[prog].isWaiting == true then return end
+
   local instr = input[i[prog]]:match("(%a%a%a).*")
+
   local op1, op2 = "", ""
   if instr == "set" then
     op1, op2 = input[i[prog]]:match("%a+ (%a+) ([-%a%d]+)")
@@ -69,22 +57,16 @@ local function iter(prog, other)
     op1, op2 = input[i[prog]]:match("%a+ (%a+) ([-%a%d]+)")
     vars[prog][op1] = (vars[prog][op1] or 0) % (tonumber(op2) or vars[prog][op2])
   elseif instr == "snd" then
-    --print(prog .. " : " .. input[i[prog]])
     op1 = input[i[prog]]:match("%a+ ([%a%d]+)")
     table.insert(sent[prog], #sent[prog] + 1, vars[prog][op1] or 0)
     vars[prog].timesSent = vars[prog].timesSent + 1
-    --print("\tIn sent_"..prog.." : "..#sent[prog])
     vars[other].isWaiting = false
   elseif instr == "rcv" then
-    --print(prog .. " : " .. input[i[prog]])
     op1 = input[i[prog]]:match("%a+ (%a+)")
     if #sent[other] > 0 then
       vars[prog][op1] = table.remove(sent[other], 1)
-      --print(prog.." recovered value")
-      --print(prog.." no longer waits")
     else
       vars[prog].isWaiting = true
-      --print(prog.." is waiting")
       i[prog] = i[prog] - 1
     end
   elseif instr == "jgz" then
@@ -96,7 +78,6 @@ local function iter(prog, other)
     print("Instruction inconnue : " .. instr)
   end
   i[prog] = i[prog] + 1
-  --print(i[prog])
 end
 
 while not (vars["prog0"].isWaiting and vars["prog1"].isWaiting) do
