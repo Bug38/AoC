@@ -102,9 +102,9 @@ local function areEquiv(t1, t2)
   -- Both
   if not equal then
     equal = areEqual(flipH(rotateRight(t1)), t2)
-         or areEqual(flipV(rotateRight(t1)), t2)
-         or areEqual(rotateRight(flipV(t1)), t2)
-         or areEqual(rotateRight(flipH(t1)), t2)
+    or areEqual(flipV(rotateRight(t1)), t2)
+    or areEqual(rotateRight(flipV(t1)), t2)
+    or areEqual(rotateRight(flipH(t1)), t2)
   end
   return equal
 end
@@ -120,53 +120,31 @@ local function transformTable(t)
   return nil
 end
 
-local function newInputFrom2()
+local function newInput(x)
   local output = {}
-  for i=1,#input*3/2 do
+  for i=1,#input*(x+1)/x do
     output[i] = {}
   end
   local offsetRow, offsetColumn = 0, 0
-  for i = 1, #input - 1, 2 do
-    for j = 1, #input - 1, 2 do
+  for i = 1, #input - (x-1), x do
+    for j = 1, #input - (x-1), x do
       local tmp = {}
-      tmp[1] = { input[i][j],     input[i][j + 1]     }
-      tmp[2] = { input[i + 1][j], input[i + 1][j + 1] }
+      for k=1,x do
+        tmp[k] = {}
+        for l=1,x do
+          tmp[k][l] = input[i+(k-1)][j+(l-1)]
+        end
+      end
       tmp = transformTable(tmp)
       for i=1,#tmp do
         for j=1,#tmp do
           output[i+offsetRow][j+offsetColumn] = tmp[i][j]
         end
       end
-      offsetColumn = offsetColumn + 3
+      offsetColumn = offsetColumn + x+1
     end
-    offsetRow = offsetRow + 3
     offsetColumn = 0
-  end
-  return output
-end
-
-local function newInputFrom3()
-  local output = {}
-  for i=1,#input*4/3 do
-    output[i] = {}
-  end
-  local offsetRow, offsetColumn = 0, 0
-  for i = 1, #input - 2, 3 do
-    for j = 1, #input - 2, 3 do
-      local tmp = {}
-      tmp[1] = { input[i][j]    , input[i][j + 1]    , input[i][j + 2]     }
-      tmp[2] = { input[i + 1][j], input[i + 1][j + 1], input[i + 1][j + 2] }
-      tmp[3] = { input[i + 2][j], input[i + 2][j + 1], input[i + 2][j + 2] }
-      tmp = transformTable(tmp)
-      for i=1,#tmp do
-        for j=1,#tmp do
-          output[i+offsetRow][j+offsetColumn] = tmp[i][j]
-        end
-      end
-      offsetColumn = offsetColumn + 4
-    end
-    offsetRow = offsetRow + 4
-    offsetColumn = 0
+    offsetRow = offsetRow + x+1
   end
   return output
 end
@@ -177,9 +155,9 @@ print("Start input :")
 
 for loop = 1, 18 do
   if #input % 2 == 0 then
-    input = newInputFrom2()
+    input = newInput(2)
   elseif #input % 3 == 0 then
-    input = newInputFrom3()
+    input = newInput(3)
   end
 
   local cpt = 0
@@ -189,5 +167,5 @@ for loop = 1, 18 do
       end
     end
   end
-  print("After cycle "..loop.." there are "..cpt.." lights on.")
+  print("After cycle "..loop..", "..cpt.." lights stay on.")
 end
