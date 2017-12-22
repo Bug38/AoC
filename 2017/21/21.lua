@@ -1,3 +1,5 @@
+local start_time = os.clock()
+
 local rules = {}
 
 for line in io.lines("input21.txt") do
@@ -19,11 +21,15 @@ for line in io.lines("input21.txt") do
   table.insert(rules, rule)
 end
 
-input = {
-  { ".","#","." },
-  { ".",".","#" },
-  { "#","#","#" },
-}
+local function hash(t)
+  local out = ""
+  for i=1,#t do
+    for j=1,#t do
+      out = out .. t[i][j]
+    end
+  end
+  return out
+end
 
 local function printInput(t)
   for i = 1, #t do
@@ -33,18 +39,15 @@ local function printInput(t)
   end
 end
 
-local function areEqual(t1, t2)
-  if #t1 ~= #t2 then return false end
-  local equal = true
-  for i = 1, #t1 do
-    for j = 1, #t1 do
-      if t1[i][j] ~= t2[i][j] then return false end
-    end
-  end
-  return true
-end
+input = {
+  { ".","#","." },
+  { ".",".","#" },
+  { "#","#","#" },
+}
 
-local function rotateRight(t)
+local match = {}
+
+local function rotate(t)
   local rotRight = {}
   for i = 1, #t do
     rotRight[i] = {}
@@ -76,50 +79,6 @@ local function flipV(t)
   return flip
 end
 
-local function areEquiv(t1, t2)
-  if #t1 ~= #t2 then return false end
-
-  -- Without conversion
-  local equal = areEqual(t1, t2)
-
-  -- With rotation
-  if not equal then
-    local rotRight = t1
-    for rot = 1, 3 do
-      rotRight = rotateRight(rotRight)
-      if areEqual(rotRight, t2) then
-        equal = true
-        break
-      end
-    end
-  end
-
-  -- With flip
-  if not equal then
-    equal = areEqual(flipH(t1), t2) or areEqual(flipV(t1), t2)
-  end
-
-  -- Both
-  if not equal then
-    equal = areEqual(flipH(rotateRight(t1)), t2)
-    or areEqual(flipV(rotateRight(t1)), t2)
-    or areEqual(rotateRight(flipV(t1)), t2)
-    or areEqual(rotateRight(flipH(t1)), t2)
-  end
-  return equal
-end
-
-local function transformTable(t)
-  for i = 1, #rules do
-    if areEquiv(t, rules[i].iT) then
-      return rules[i].oT
-    end
-  end
-  print("ERROR, can't find equiv for table :")
-  printInput(t)
-  return nil
-end
-
 local function newInput(x)
   local output = {}
   for i=1,#input*(x+1)/x do
@@ -135,7 +94,7 @@ local function newInput(x)
           tmp[k][l] = input[i+(k-1)][j+(l-1)]
         end
       end
-      tmp = transformTable(tmp)
+      tmp = match[hash(tmp)]
       for i=1,#tmp do
         for j=1,#tmp do
           output[i+offsetRow][j+offsetColumn] = tmp[i][j]
@@ -149,23 +108,46 @@ local function newInput(x)
   return output
 end
 
-print("Start input :")
-printInput(input)
-print("Start input :")
+print(string.format("[%f] Data loaded", os.clock() - start_time))
 
-for loop = 1, 18 do
+for i=1,#rules do
+  match[hash(rules[i].iT)] = rules[i].oT
+  match[hash(flipH(rules[i].iT))] = rules[i].oT
+  match[hash(flipV(rules[i].iT))] = rules[i].oT
+  match[hash(rotate(rules[i].iT))] = rules[i].oT
+  match[hash(rotate(rotate(rules[i].iT)))] = rules[i].oT
+  match[hash(rotate(rotate(rotate(rules[i].iT))))] = rules[i].oT
+  match[hash(flipH(rotate(rules[i].iT)))] = rules[i].oT
+  match[hash(flipV(rotate(rules[i].iT)))] = rules[i].oT
+end
+
+print(string.format("[%f] Map built", os.clock() - start_time))
+
+--print()
+--print("Start input :")
+--printInput(input)
+print()
+
+print("Reset cpt, starting alorithm")
+start_time = os.clock()
+print()
+
+for loop = 1, 22 do
   if #input % 2 == 0 then
     input = newInput(2)
   elseif #input % 3 == 0 then
     input = newInput(3)
   end
+  print(string.format("[%f] %2d -> size = %5d", os.clock() - start_time,loop,#input))
+end
 
-  local cpt = 0
-  for i=1,#input do
-    for j=1,#input do
-      if input[i][j] == "#" then cpt = cpt + 1
-      end
+local cpt = 0
+for i=1,#input do
+  for j=1,#input do
+    if input[i][j] == "#" then cpt = cpt + 1
     end
   end
-  print("After cycle "..loop..", "..cpt.." lights stay on.")
 end
+
+print("Lights on : "..cpt)
+print()
