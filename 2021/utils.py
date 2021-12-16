@@ -9,6 +9,6 @@ def getLinesFromFile(filename):
 def evalTime(nbiter, func):
 	import time
 	start = time.time()
-	for i in range(nbiter):
+	for _ in range(nbiter):
 		func()
 	print(f"Time for {nbiter} iteration{'s' if nbiter > 1 else ''}: {int((time.time() - start)*10000) / 10000}")
