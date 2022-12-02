@@ -11,7 +11,6 @@ inst = []
 for d in data[data.index('')+1:]:
 	axis, val = d.split()[-1].split('=')
 	inst.append((axis, int(val)))
-print(len(dots))
 
 def printDots(dots):
 	maxX, maxY = 0, 0
@@ -45,6 +44,7 @@ def part1():
 	return len(d)
 
 def part2():
+	print('Part2:')
 	d = dots.copy()
 	for i in inst:
 		d = iterInst(i, d)
@@ -52,4 +52,4 @@ def part2():
 	return len(d)
 
 print(f'Part1: {part1()}')
-print(f'Part2: {part2()}')
+part2()
