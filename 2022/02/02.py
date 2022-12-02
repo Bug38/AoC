@@ -7,40 +7,30 @@ example = [
     ]
 
 def puzzle(input):
-    shapeScore = {"X":1, "Y":2, "Z":3}
+    eq = {"X":"A", "Y":"B", "Z":"C"}
+    winAgainst = {"A": "C", "B":"A", "C":"B"}
+    shapeScore = {"A":1, "B":2, "C":3}
 
     part1 = 0
     for l in input:
         other, me = l.strip().split(' ')
+        me = eq[me]
         part1 += shapeScore[me]
-        if me == "X":
-            if other == "C":
-                part1 += 6
-            elif other == "A":
-                part1 += 3
-        if me == "Y":
-            if other == "A":
-                part1 += 6
-            elif other == "B":
-                part1 += 3
-        if me == "Z":
-            if other == "B":
-                part1 += 6
-            elif other == "C":
-                part1 += 3
-
-    looseAgainst = {"A": "B", "B":"C", "C":"A"}
-    shapeScore = {"A":1, "B":2, "C":3}
+        if winAgainst[me] == other:
+            part1 += 6
+        elif me == other:
+            part1 += 3
 
     part2=0
     for l in input:
         other, end = l.strip().split(' ')
         if end == "X":
-            part2 += sum([shapeScore[x] for x in looseAgainst if looseAgainst[x] == other])
+            part2 += shapeScore[winAgainst[other]]
         if end == "Y":
             part2 += (3 + shapeScore[other])
         if end == "Z":
-            part2 += (6 + shapeScore[looseAgainst[other]])
+            part2 += (6 + sum([shapeScore[x] for x in shapeScore if winAgainst[x] == other]))
+        
     return (part1, part2)
 
 
