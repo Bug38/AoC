@@ -27,6 +27,8 @@ for l in input:
         current = 0
         continue
     current += int(l)
+elves.append(current)
+part1 = max(current, part1)
 
 part2 = sum(sorted(elves)[-3:])
 
