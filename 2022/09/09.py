@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 from dataclasses import dataclass
 
 input = open("09/09.txt").readlines()
@@ -25,8 +25,6 @@ example2 = [
     "U 20"
 ]
 
-moveX = {'U':0, 'D':0, 'L':-1, 'R':1}
-moveY = {'U':-1, 'D':1, 'L':0, 'R':0}
 
 @dataclass
 class Point():
@@ -44,49 +42,35 @@ class Point():
                 self.move('R' if diffx > 0 else 'L')
         return self
     def move(self, dir: str):
+        moveX = {'U':0, 'D':0, 'L':-1, 'R':1}
+        moveY = {'U':-1, 'D':1, 'L':0, 'R':0}
         self.x += moveX[dir]
         self.y += moveY[dir]
         return self
 
-def runPart1(input: List[str]):
-    H = Point(0,0)
-    T = Point(0,0)
+def run(input: List[str], nodes: int):
+    Rope = []
+    for _ in range(nodes):
+        Rope.append(Point(0,0))
     TailPosSet = set()
     i = 0
     while i != len(input):
         d, n = input[i].split()[0], int(input[i].split()[1])
         while n > 0:
-            H.move(d)
-            T.moveIfTooFar(H)
-            TailPosSet.add((T.x, T.y))
+            Rope[0].move(d)
+            for ir in range(1, len(Rope)):
+                Rope[ir].moveIfTooFar(Rope[ir-1])
+            TailPosSet.add((Rope[-1].x, Rope[-1].y))
             n -= 1
         i += 1
     return len(list(TailPosSet))
-
-def runPart2(input: List[str]):
-    R = []
-    for _ in range(10):
-        R.append(Point(0,0))
-    TailPosSet = set()
-    i = 0
-    while i != len(input):
-        d, n = input[i].split()[0], int(input[i].split()[1])
-        while n > 0:
-            R[0].move(d)
-            for ir in range(1, len(R)):
-                R[ir].moveIfTooFar(R[ir-1])
-                TailPosSet.add((R[-1].x, R[-1].y))
-            n -= 1
-        i += 1
-    return len(list(TailPosSet))
-
 
 def puzzle(input: List[str]):
     for i in range(len(input)):
         input[i] = input[i].strip()
 
-    part1 = runPart1(input)
-    part2 = runPart2(input)
+    part1 = run(input, 2)
+    part2 = run(input, 10)
     
     return (part1, part2)
 
