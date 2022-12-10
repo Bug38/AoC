@@ -29,47 +29,37 @@ def exec(reg: registers, instr: str): # returns the shift to do in the program (
         else:
             reg.tmp = value
             return 0
-            
-def runPart1(input):
+
+def printCRT(crt: str):
+    for i, c in enumerate(crt):
+        if not i % 40:
+            print()
+        print(c, end='')
+    print()
+
+def runCode(input):
     reg = registers(1, 0)
     i, cycle = 0, 0
     part1 = 0
-    while i < len(input):
-        cycle += 1
-        if cycle == 20 or (cycle-20) % 40 == 0:
-            part1 += reg.x * cycle
-        shift = exec(reg, input[i])
-        i += shift
-    return part1
-
-def runPart2(input):
-    reg = registers(1, 0)
-    i, cycle = 0, 0
     part2 = ""
     while i < len(input):
-        if reg.x-1 <= cycle%40 <= reg.x+1:
+        if reg.x-1 <= cycle % 40 <= reg.x+1:
             part2 += '#'
         else:
             part2 += '.'
         cycle += 1
+        if not (cycle-20) % 40:
+            part1 += reg.x * cycle
         shift = exec(reg, input[i])
         i += shift
-    return part2
-
-def printCRT(crt: str):
-    for i, c in enumerate(crt):
-        if i%40 == 0:
-            print()
-        print(c, end='')
-    print()
+    return part1, part2
 
 
 def puzzle(input: List[str]):
     for i in range(len(input)):
         input[i] = input[i].strip()
 
-    part1 = runPart1(input)
-    part2 = runPart2(input)
+    part1, part2 = runCode(input)
     
     return (part1, part2)
 
@@ -84,6 +74,6 @@ except AssertionError as e:
 
 part1, part2 = puzzle(input)
 print(f'{part1=}')
-print('part2=')
+print('part2=', end='')
 printCRT(part2)
 print()
