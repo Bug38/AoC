@@ -1,5 +1,6 @@
 from typing import List, Dict
 from dataclasses import dataclass
+from numpy import prod, array, uint64, append, ndarray
 
 input = open("11/11.txt").readlines()
 
@@ -35,7 +36,7 @@ example = [
 
 @dataclass
 class Monkey():
-    items: List[int]
+    items: ndarray
     operation: str
     testDiv: int
     monkeyIfTrue: int
@@ -45,7 +46,7 @@ def analyseInput(input: List[str]) -> Dict[int, Monkey]:
     monkeys : Dict[int, Monkey] = {}
     for i in range(0, len(input), 7):
         nb = int(input[i].split()[1][:-1])
-        items = [int(x) for x in input[i+1].split(':')[1].split(',')]
+        items = array([int(x) for x in input[i+1].split(':')[1].split(',')], dtype=uint64)
         operation = input[i+2].split('=')[1].strip()
         testDiv = int(input[i+3].split()[-1])
         ifTrue = int(input[i+4].split()[-1])
@@ -53,27 +54,31 @@ def analyseInput(input: List[str]) -> Dict[int, Monkey]:
         monkeys[nb] = Monkey(items, operation, testDiv, ifTrue, ifFalse)
     return monkeys
 
-def iterMonkey(nbMonkey: int, monkeys: Dict[int, Monkey], reduceWorryLevel: bool = True):
+def iterMonkey(nbMonkey: int, monkeys: Dict[int, Monkey], reduceWorryLevel: bool = True, coef: int = 0):
     m = monkeys[nbMonkey]
     while len(m.items):
         '''inspect'''
         m.items[0] = eval(m.operation.replace('old', 'm.items[0]'))
+        if m.items[0] > coef:
+            m.items[0] %= coef
         '''divide'''
         if reduceWorryLevel:
             m.items[0] = int(m.items[0]/3)
         '''test'''
         if not m.items[0] % m.testDiv:
             '''give it to another'''
-            monkeys[m.monkeyIfTrue].items.append(m.items.pop(0))
+            monkeys[m.monkeyIfTrue].items = append(monkeys[m.monkeyIfTrue].items, m.items[0])
         else:
-            monkeys[m.monkeyIfFalse].items.append(m.items.pop(0))
+            monkeys[m.monkeyIfFalse].items = append(monkeys[m.monkeyIfFalse].items, m.items[0])
+        m.items = m.items[1:]
 
 def runPart(monkeys: Dict[int, Monkey], rounds: int, reduceWorryLevel: bool):
     countedItems = [0]*len(monkeys)
+    coef = prod([monkeys[m].testDiv for m in monkeys])
     for i in range(rounds):
         for m in monkeys:
             countedItems[m] += len(monkeys[m].items)
-            iterMonkey(m, monkeys, reduceWorryLevel)
+            iterMonkey(m, monkeys, reduceWorryLevel, coef)
     countedItems.sort()
     return countedItems[-1] * countedItems[-2]
 
@@ -84,12 +89,13 @@ def puzzle(input: List[str]):
     monkeys = analyseInput(input)
     part1 = runPart(monkeys, 20, True)
     monkeys = analyseInput(input)
-    part2 = 0
+    part2 = runPart(monkeys, 10000, False)
     
     return (part1, part2)
 
+
 try:
-    assert(puzzle(example) == (10605, 0))
+    assert(puzzle(example) == (10605, 2713310158))
 except AssertionError as e:
     print(f"Error in examples, got {puzzle(example)}")
     exit()
