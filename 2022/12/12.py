@@ -1,5 +1,4 @@
 from typing import List, Dict, Tuple, Set
-from dataclasses import dataclass
 
 input = open("12/12.txt").readlines()
 
@@ -20,14 +19,21 @@ def getNeighbors(coords: Tuple[int, int]):
         
 
 def canGoThere(current: Tuple[int, int], target: Tuple[int, int], map: List[List[str]]) -> bool:
+    # out of boundaries
     if target[0] < 0 or target[1] < 0 or target[0] >= len(map) or target[1] >= len(map[0]):
         return False
-    if map[current[0]][current[1]] == 'S' and map[target[0]][target[1]] == 'a':
-        return True
+    
+    # Start and End
+    if map[current[0]][current[1]] == 'S':
+        if map[target[0]][target[1]] == 'a':
+            return True
+        return False
     if map[target[0]][target[1]] == 'E':
         if map[current[0]][current[1]] == 'z':
             return True
         return False
+
+    
     if ord(map[current[0]][current[1]]) <= ord(map[target[0]][target[1]]) <= ord(map[current[0]][current[1]]) + 1:
         return True
     if ord(map[current[0]][current[1]]) > ord(map[target[0]][target[1]]):
